@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chromatic Gradient Sphere</title>
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== Sphere Container ===== */
+    .sphere {
+      position: relative;
+      width: clamp(260px, 55vmin, 420px);
+      height: clamp(260px, 55vmin, 420px);
+      border-radius: 50%;
+      overflow: hidden;
+      background: #ffffff;
+      filter: blur(6px);
+      opacity: 0.92;
+      animation:
+        sphereFloat 4.5s ease-in-out infinite,
+        spherePulse 6s ease-in-out infinite,
+        chromaticShift 7s ease-in-out infinite;
+    }
+
+    /* --- Layer 1: Base lavender → purple (NO blur) --- */
+    .layer-base {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle at 50% 50%,
+        #F0D6F5 0%,
+        #C47DD4 50%,
+        transparent 82%
+      );
+      /* NO blur on base */
+    }
+
+    /* --- Layer 2: Pink/coral blob (top-right) --- */
+    .layer-pink {
+      position: absolute;
+      width: 80%;
+      height: 70%;
+      left: 30%;
+      top: -10%;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle at 50% 55%,
+        #FF6EB4 0%,
+        #FF4444 55%,
+        transparent 85%
+      );
+      filter: blur(25px);
+      opacity: 0.85;
+    }
+
+    /* --- Layer 3: Blue/purple blob (bottom-left) --- */
+    .layer-blue {
+      position: absolute;
+      width: 75%;
+      height: 70%;
+      left: -10%;
+      top: 40%;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle at 50% 45%,
+        #7B5BFF 0%,
+        #4FC3F7 55%,
+        transparent 85%
+      );
+      filter: blur(25px);
+      opacity: 0.80;
+    }
+
+    /* --- Layer 4: Center highlight (white glow) --- */
+    .layer-highlight {
+      position: absolute;
+      width: 45%;
+      height: 45%;
+      left: 27%;
+      top: 20%;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle at 50% 50%,
+        rgba(255, 255, 255, 1) 0%,
+        rgba(255, 255, 255, 0.6) 40%,
+        transparent 100%
+      );
+      filter: blur(15px);
+      opacity: 0.95;
+    }
+
+    /* --- Layer 5: Inner sharpness (conic texture) --- */
+    .layer-sharp {
+      position: absolute;
+      inset: 10%;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg at 50% 50%,
+        #FF6EB4 0deg,
+        #C47DD4 60deg,
+        #7B5BFF 120deg,
+        #4FC3F7 180deg,
+        #C47DD4 240deg,
+        #FF6EB4 300deg,
+        #FF6EB4 360deg
+      );
+      /* NO blur — adds visible texture */
+      opacity: 0.15;
+    }
+
+    /* ===== Animations ===== */
+
+    @keyframes chromaticShift {
+      0%, 100% {
+        filter: blur(6px) hue-rotate(0deg);
+      }
+      35% {
+        filter: blur(6px) hue-rotate(25deg);
+      }
+      70% {
+        filter: blur(6px) hue-rotate(-15deg);
+      }
+    }
+
+    @keyframes sphereFloat {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-14px);
+      }
+    }
+
+    @keyframes spherePulse {
+      0%, 100% {
+        scale: 1;
+      }
+      40% {
+        scale: 1.04;
+      }
+      75% {
+        scale: 0.98;
+      }
+    }
+
+    /* ===== Reduced Motion ===== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sphere">
+    <!-- Layer 1: Base lavender → purple (no blur) -->
+    <div class="layer-base"></div>
+    <!-- Layer 2: Pink/coral blob top-right -->
+    <div class="layer-pink"></div>
+    <!-- Layer 3: Blue/purple blob bottom-left -->
+    <div class="layer-blue"></div>
+    <!-- Layer 4: White highlight glow -->
+    <div class="layer-highlight"></div>
+    <!-- Layer 5: Inner sharpness conic texture -->
+    <div class="layer-sharp"></div>
+  </div>
+</body>
+</html>
