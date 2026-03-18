@@ -15,7 +15,7 @@ html {
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
-  background-color: #f5f5f5;
+  background-color: #ffffff;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -26,7 +26,7 @@ body {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,17 +43,15 @@ body {
 /* ===== Popup Card ===== */
 .popup {
   background: #FFFFFF;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 357px;
+  border-radius: 16px;
+  width: 320px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
   padding: 0 16px;
   position: relative;
   animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
 }
 
 @keyframes slideUp {
@@ -67,13 +65,13 @@ body {
   }
 }
 
-/* ===== Close Button (absolute top-right) ===== */
+/* ===== Close Button ===== */
 .close-btn {
   position: absolute;
-  right: 16px;
-  top: 0;
-  width: 40px;
-  height: 40px;
+  right: 12px;
+  top: 8px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -94,160 +92,220 @@ body {
   transform: scale(0.92);
 }
 
-.close-btn svg {
-  width: 20px;
-  height: 20px;
-}
-
 /* ===== Header ===== */
 .popup-header {
-  width: 325px;
+  width: 100%;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 4px;
-  padding-top: 16px;
+  padding: 16px 0 12px;
 }
 
 .popup-title {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 1.5;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.4;
   text-align: center;
-  color: #000000;
-  width: 100%;
+  color: #1a1a1a;
 }
 
-/* ===== Content Area ===== */
-.content-area {
-  width: 325px;
-  height: 325px;
-  border-radius: 4px;
+/* ===== Image / Orb Area ===== */
+.image-area {
+  width: 100%;
+  height: 220px;
+  border-radius: 10px;
   overflow: hidden;
   position: relative;
-  background: #f0f0f0;
+  background: #e8e8ee;
 }
 
+/* ===== Preview Image (hidden during loading) ===== */
 .preview-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: blur(24px);
-  transition: filter 0.8s ease, opacity 0.4s ease;
-}
-
-.preview-image.loaded {
-  filter: blur(0px) !important;
-}
-
-/* ===== Gradient Overlay ===== */
-.gradient-overlay {
   position: absolute;
   top: 0;
   left: 0;
-  width: 325px;
-  height: 325px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
-  border-radius: 0 0 8px 8px;
-  pointer-events: none;
+  opacity: 0;
+  z-index: 2;
   transition: opacity 0.6s ease;
 }
 
-.gradient-overlay.hidden {
-  opacity: 0;
+.preview-image.revealed {
+  opacity: 1;
 }
 
-/* ===== Center Loader ===== */
-.center-loader {
+/* ═══════════════════════════════════
+   THE ORB EFFECT
+   ═══════════════════════════════════ */
+
+.orb-container {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: none; /* Hidden by default per Figma — no spinner in center */
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.5s ease;
+  inset: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  filter: blur(6px);
+  opacity: 0.92;
+  z-index: 1;
+  transition: opacity 0.8s ease;
+  animation:
+    chromatic 7s ease-in-out infinite,
+    float 4s ease-in-out infinite,
+    pulse 6s ease-in-out infinite;
 }
 
-.center-loader.hidden {
+.orb-container.fade-out {
   opacity: 0;
-  pointer-events: none;
 }
 
-/* CSS Dots Spinner Loader */
-.loader {
-  --d: 22px;
-  width: 4px;
-  height: 4px;
+/* Orb Layers — absolutely positioned inside container */
+.orb-layer {
+  position: absolute;
   border-radius: 50%;
-  color: #808C90;
-  box-shadow:
-    calc(1*var(--d))      calc(0*var(--d))     0 0,
-    calc(0.707*var(--d))  calc(0.707*var(--d)) 0 1px,
-    calc(0*var(--d))      calc(1*var(--d))     0 2px,
-    calc(-0.707*var(--d)) calc(0.707*var(--d)) 0 3px,
-    calc(-1*var(--d))     calc(0*var(--d))     0 4px,
-    calc(-0.707*var(--d)) calc(-0.707*var(--d))0 5px,
-    calc(0*var(--d))      calc(-1*var(--d))    0 6px;
-  animation: l27 1s infinite steps(8);
 }
 
-@keyframes l27 {
-  100% { transform: rotate(1turn); }
+/* Layer 1 — Base gradient (warm peach → cream → lavender) */
+.orb-base {
+  inset: 0;
+  border-radius: 0;
+  background: radial-gradient(circle at 40% 40%, #F0D5C3, #E8CCBB, #DDD0E8);
 }
 
-/* ===== Progress Area (bottom of content) ===== */
-.progress-area {
+/* Layer 2 — Peach/salmon blob (top-left) */
+.orb-pink {
+  width: 90%;
+  height: 80%;
+  top: -15%;
+  left: -10%;
+  background: radial-gradient(circle, #EDA888, #E8A080);
+  filter: blur(28px);
+  opacity: 0.8;
+  animation: driftPeach 7s ease-in-out infinite;
+}
+
+/* Layer 3 — Lavender/periwinkle blob (center-right) */
+.orb-purple {
+  width: 85%;
+  height: 80%;
+  top: 10%;
+  left: 20%;
+  background: radial-gradient(circle, #A8B4DC, #9AADE0);
+  filter: blur(28px);
+  opacity: 0.75;
+  animation: driftLavender 9s ease-in-out infinite;
+}
+
+/* Layer 4 — Warm center highlight */
+.orb-highlight {
+  width: 50%;
+  height: 50%;
+  top: 15%;
+  left: 20%;
+  background: radial-gradient(circle, rgba(255,242,230,0.85), transparent);
+  filter: blur(16px);
+  opacity: 0.75;
+  animation: driftHighlight 11s ease-in-out infinite;
+}
+
+/* ===== Orb Animations ===== */
+@keyframes chromatic {
+  0%   { filter: blur(6px) hue-rotate(0deg); }
+  33%  { filter: blur(6px) hue-rotate(12deg); }
+  66%  { filter: blur(6px) hue-rotate(-10deg); }
+  100% { filter: blur(6px) hue-rotate(0deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.02); }
+}
+
+/* Drift for peach blob — larger range */
+@keyframes driftPeach {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(30px, 18px); }
+  50%  { transform: translate(15px, -12px); }
+  75%  { transform: translate(-20px, 14px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Drift for lavender blob — larger range, opposite direction */
+@keyframes driftLavender {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-25px, 15px); }
+  50%  { transform: translate(-10px, -20px); }
+  75%  { transform: translate(20px, -10px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Drift for highlight — gentle wander */
+@keyframes driftHighlight {
+  0%   { transform: translate(0, 0); }
+  33%  { transform: translate(15px, -14px); }
+  66%  { transform: translate(-14px, 10px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ===== Orb Label ===== */
+.orb-label {
   position: absolute;
-  left: 16px;
   bottom: 16px;
-  width: 295px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  z-index: 4;
+  white-space: nowrap;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+  letter-spacing: 0.2px;
+}
+
+/* ═══════════════════════════════════
+   PROGRESS SECTION
+   ═══════════════════════════════════ */
+.progress-section {
+  width: 100%;
+  padding: 14px 0 6px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   transition: opacity 0.5s ease;
 }
 
-.progress-area.hidden {
+.progress-section.hidden {
   opacity: 0;
   pointer-events: none;
 }
 
-.progress-row {
+.progress-info {
   display: flex;
-  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
-  gap: 12px;
 }
 
-.apply-detail {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-}
-
-.apply-text {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+.progress-label {
+  font-size: 13px;
   font-weight: 400;
-  font-size: 14px;
-  line-height: 1.43;
   color: #808C90;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  margin-right: 8px;
 }
 
 .progress-percent {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 13px;
+  font-weight: 500;
   color: #808C90;
   flex-shrink: 0;
 }
@@ -255,7 +313,7 @@ body {
 /* Progress Bar */
 .progress-bar-track {
   width: 100%;
-  height: 8px;
+  height: 4px;
   background: #E5E8E8;
   border-radius: 9999px;
   overflow: hidden;
@@ -263,128 +321,123 @@ body {
 
 .progress-bar-fill {
   height: 100%;
-  background: #5E6A6E;
+  background: #4A90D9;
   border-radius: 9999px;
-  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
 .progress-bar-fill::after {
   content: '';
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(94, 106, 110, 0.4) 50%,
+    rgba(255, 255, 255, 0.4) 50%,
     transparent 100%
   );
   animation: shimmer 2s infinite;
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
+  0%   { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
 
-/* ===== CTA Area ===== */
+/* ═══════════════════════════════════
+   CTA BUTTON
+   ═══════════════════════════════════ */
 .cta-area {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 16px;
+  padding: 6px 0 16px;
 }
 
 .cta-btn {
-  width: 325px;
-  height: 48px;
+  width: 100%;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 8px 16px;
-  background-color: #B6E3FF;
+  background-color: #D4EBFA;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  border-radius: 9999px;
+  cursor: default;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
 
-.cta-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.cta-btn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
 .cta-btn:disabled {
   cursor: default;
+  opacity: 0.85;
 }
 
-/* ===== Primary Button State (Add to card) ===== */
-.cta-btn--primary {
-  background-color: #2196F3;
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+.cta-btn.active {
+  background-color: #4A90D9;
+  cursor: pointer;
+  opacity: 1;
+  box-shadow: 0 2px 12px rgba(74, 144, 217, 0.35);
 }
 
-.cta-btn--primary:hover:not(:disabled) {
-  background-color: #1976D2;
-  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+.cta-btn.active:hover {
+  background-color: #3A7FC8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(74, 144, 217, 0.45);
 }
 
-.cta-btn--primary:active:not(:disabled) {
-  background-color: #1565C0;
+.cta-btn.active:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 6px rgba(74, 144, 217, 0.3);
 }
 
-.cta-btn--primary .cta-text {
-  font-size: 16px;
-}
-
-/* Spinner Animation */
+/* Spinner */
 .spinner-icon {
   animation: spin 1s linear infinite;
   flex-shrink: 0;
 }
 
+.spinner-icon.hidden {
+  display: none;
+}
+
 @keyframes spin {
-  0% { transform: rotate(0deg); }
+  0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
 .cta-text {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
   font-size: 14px;
-  line-height: 1.43;
+  line-height: 1.4;
   color: #FFFFFF;
-  transition: font-size 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+/* ===== Close Animations ===== */
+@keyframes slideDown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 /* ===== Responsive ===== */
-@media (max-width: 400px) {
+@media (max-width: 360px) {
   .popup {
-    max-width: 100%;
-    margin: 0 8px;
-  }
-
-  .content-area {
-    width: 100%;
-    height: 0;
-    padding-bottom: 100%;
-  }
-
-  .cta-btn {
-    width: 100%;
+    width: calc(100% - 16px);
   }
 }
 

@@ -1,154 +1,145 @@
 /**
- * Preview Design Popup - Interactive Script
- * Progress flow: 10% → 80% → 90% → 100% → Done (Add to card)
- * Each step takes 2 seconds
+ * Preview Design Popup — AI Orb Loading Effect
+ * 
+ * PHASE 1: Loading (0% → 100%)
+ *   - Orb plasma effect fills the image area
+ *   - Progress bar advances with randomized increments
+ *   - Label changes per progress stage
+ * 
+ * PHASE 2: Complete (100%)
+ *   - Orb fades out, design image fades in
+ *   - Progress hides, CTA becomes active
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const overlay = document.getElementById('previewOverlay');
-  const popup = document.getElementById('previewPopup');
-  const closeBtn = document.getElementById('closeBtn');
-  const progressFill = document.getElementById('progressFill');
+  // —— DOM Elements ——
+  const overlay       = document.getElementById('previewOverlay');
+  const popup         = document.getElementById('previewPopup');
+  const closeBtn      = document.getElementById('closeBtn');
+  const orbContainer  = document.getElementById('orbContainer');
+  const orbLabel      = document.getElementById('orbLabel');
+  const previewImage  = document.getElementById('previewImage');
+  const progressSection = document.getElementById('progressSection');
+  const progressFill  = document.getElementById('progressFill');
   const progressPercent = document.getElementById('progressPercent');
-  const applyText = document.getElementById('applyText');
-  const progressArea = document.getElementById('progressArea');
-  const gradientOverlay = document.getElementById('gradientOverlay');
-  const centerLoader = document.getElementById('centerLoader');
-  const previewImage = document.getElementById('previewImage');
-  const ctaBtn = document.getElementById('ctaBtn');
-  const ctaText = ctaBtn.querySelector('.cta-text');
-  const spinnerIcon = ctaBtn.querySelector('.spinner-icon');
+  const progressLabel = document.getElementById('progressLabel');
+  const ctaBtn        = document.getElementById('ctaBtn');
+  const ctaText       = document.getElementById('ctaText');
+  const spinnerIcon   = document.getElementById('spinnerIcon');
 
-  // Progress steps: each step runs every 2 seconds
-  const steps = [
-    { percent: 10,  text: 'Appling Number of Dogs...',    button: 'Starting',    blur: 24 },
-    { percent: 80,  text: "Appling Mom's Skin Color...",  button: 'Analyzing',   blur: 14 },
-    { percent: 90,  text: "Appling Mom's Hair Color...",  button: 'Almost done', blur: 6 },
-    { percent: 100, text: 'Completed',                    button: 'Done',        blur: 1 },
-  ];
+  // —— State ——
+  let progress = 0;
+  let intervalId = null;
+  let imageLoaded = false;
 
-  let currentStep = 0;
-  let progressInterval = null;
+  // Pre-load the reveal image
+  const revealImg = new Image();
+  revealImg.src = 'https://picsum.photos/320/220';
+  revealImg.onload = () => { imageLoaded = true; };
 
-  // Initialize first step immediately
-  function init() {
-    const firstStep = steps[0];
-    updateProgress(firstStep.percent, firstStep.text);
-    updateButton(firstStep.button);
-    previewImage.style.filter = `blur(${firstStep.blur}px)`;
+  // —— Stage Labels ——
+  function getStageLabel(pct) {
+    if (pct <= 30) return 'Applying your customization...';
+    if (pct <= 60) return 'Rendering design details...';
+    if (pct <= 90) return 'Almost there...';
+    if (pct <= 99) return 'Finalizing...';
+    return 'Your design is ready!';
+  }
 
-    // Start stepping through the rest after 2s
-    progressInterval = setInterval(() => {
-      currentStep++;
-      if (currentStep < steps.length) {
-        const step = steps[currentStep];
-        updateProgress(step.percent, step.text);
-        updateButton(step.button);
+  function getOrbLabel(pct) {
+    if (pct < 100) return 'Generating your design...';
+    return '';
+  }
 
-        // Gradually reduce blur
-        previewImage.style.filter = `blur(${step.blur}px)`;
-      } else {
-        clearInterval(progressInterval);
-        // After 2s from "Done" state, transition to final state
-        setTimeout(onProgressComplete, 2000);
+  // —— Update UI ——
+  function updateUI(pct) {
+    progressFill.style.width = `${pct}%`;
+    progressPercent.textContent = `${Math.round(pct)}%`;
+    progressLabel.textContent = getStageLabel(pct);
+    orbLabel.textContent = getOrbLabel(pct);
+  }
+
+  // —— Progress Simulation ——
+  function startProgress() {
+    intervalId = setInterval(() => {
+      if (progress >= 99) {
+        // Hold at 99%, then jump to 100 after 1s
+        clearInterval(intervalId);
+        setTimeout(() => {
+          progress = 100;
+          updateUI(100);
+          onComplete();
+        }, 1000);
+        return;
       }
-    }, 2000);
+
+      let increment;
+      if (progress < 80) {
+        // Normal speed: 1–4%
+        increment = 1 + Math.random() * 3;
+      } else {
+        // Slow down: 0.3–0.8%
+        increment = 0.3 + Math.random() * 0.5;
+      }
+
+      progress = Math.min(progress + increment, 99);
+      updateUI(progress);
+    }, 400);
   }
 
-  // Update progress bar and text
-  function updateProgress(percent, text) {
-    progressFill.style.width = `${percent}%`;
-    progressPercent.textContent = `${percent}%`;
-    if (text) {
-      applyText.textContent = text;
-    }
-  }
+  // —— Phase 2: Complete Transition ——
+  function onComplete() {
+    // 1) Fade out orb
+    orbContainer.classList.add('fade-out');
 
-  // Update CTA button text
-  function updateButton(text) {
-    ctaText.textContent = text;
-  }
-
-  // Final state: hide overlay & loader, show product, "Add to card" button
-  function onProgressComplete() {
-    // Step 1: Fade out gradient, loader, and progress area
-    gradientOverlay.classList.add('hidden');
-    centerLoader.classList.add('hidden');
-    progressArea.classList.add('hidden');
-
-    // Step 2: After fade out (500ms), swap image
+    // 2) After orb fades (800ms), reveal the image
     setTimeout(() => {
-      previewImage.style.transition = 'filter 0.6s ease, opacity 0.3s ease';
-      previewImage.style.opacity = '0';
+      // Ensure picsum image is set on the img element
+      previewImage.src = revealImg.src;
+      previewImage.classList.add('revealed');
 
+      // 3) Hide progress area
+      progressSection.classList.add('hidden');
+
+      // 4) Activate the CTA button
       setTimeout(() => {
-        previewImage.src = 'assets/product_mockup.png';
-        previewImage.style.filter = 'blur(0px)';
-        previewImage.style.opacity = '1';
-        previewImage.classList.add('loaded');
-
-        // Step 3: After image loaded, update button
-        spinnerIcon.style.display = 'none';
-        ctaText.textContent = 'Add to card';
-        ctaBtn.classList.add('cta-btn--primary');
+        spinnerIcon.classList.add('hidden');
+        ctaText.textContent = 'View full preview';
         ctaBtn.disabled = false;
+        ctaBtn.classList.add('active');
       }, 300);
-    }, 500);
+    }, 800);
   }
 
-  // Close popup
+  // —— Close Popup ——
   function closePopup() {
     popup.style.animation = 'slideDown 0.3s ease-in forwards';
     overlay.style.animation = 'fadeOut 0.3s ease-in forwards';
-
     setTimeout(() => {
       overlay.style.display = 'none';
+      clearInterval(intervalId);
     }, 300);
   }
 
-  // Event listeners
+  // —— Event Listeners ——
   closeBtn.addEventListener('click', closePopup);
 
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) {
-      closePopup();
-    }
+    if (e.target === overlay) closePopup();
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closePopup();
-    }
+    if (e.key === 'Escape') closePopup();
   });
 
   ctaBtn.addEventListener('click', () => {
-    if (!ctaBtn.disabled && ctaBtn.classList.contains('cta-btn--primary')) {
-      console.log('Add to cart clicked!');
-      // Handle add to cart action here
+    if (!ctaBtn.disabled && ctaBtn.classList.contains('active')) {
+      console.log('View full preview clicked!');
+      // Handle preview action here
     }
   });
 
-  // Start the animation
-  init();
+  // —— Init ——
+  updateUI(0);
+  startProgress();
 });
-
-// Close animation keyframes
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  @keyframes slideDown {
-    from {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-    to {
-      opacity: 0;
-      transform: translateY(20px) scale(0.97);
-    }
-  }
-
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-`;
-document.head.appendChild(styleSheet);
